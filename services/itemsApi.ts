@@ -83,7 +83,7 @@ export const {
 export const fetchItems = async (): Promise<Item[]> => {
   try {
     const response = await api.get("/posts");
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching items:", error);
     throw error;
@@ -93,7 +93,7 @@ export const fetchItems = async (): Promise<Item[]> => {
 export const fetchItemById = async (id: string): Promise<Item> => {
   try {
     const response = await api.get(`/posts/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error(`Error fetching item ${id}:`, error);
     throw error;
@@ -103,7 +103,7 @@ export const fetchItemById = async (id: string): Promise<Item> => {
 export const createItem = async (item: Omit<Item, "id">): Promise<Item> => {
   try {
     const response = await api.post("/posts", item);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error creating item:", error);
     throw error;
@@ -113,7 +113,7 @@ export const createItem = async (item: Omit<Item, "id">): Promise<Item> => {
 export const updateItem = async (item: Item): Promise<Item> => {
   try {
     const response = await api.put(`/posts/${item.id}`, item);
-    return response.data;
+    return response;
   } catch (error) {
     console.error(`Error updating item ${item.id}:`, error);
     throw error;
