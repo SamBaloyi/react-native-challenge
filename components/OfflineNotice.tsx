@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     position: "absolute",
-    top: 0,
+    top: 35,
     left: 0,
     right: 0,
     zIndex: 1000,
