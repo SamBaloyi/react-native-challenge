@@ -47,7 +47,7 @@ export default function ItemDetailScreen() {
   };
 
   const handleEdit = () => {
-    router.push(`/item/edit/${parsedId}`);
+    router.push(`/item/edit/${id}`);
   };
 
   if (loading) {
