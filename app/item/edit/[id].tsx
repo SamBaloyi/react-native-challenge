@@ -9,18 +9,17 @@ import { ThemedText } from "../../../components/ThemedText";
 
 export default function EditItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const parsedId = id ? parseInt(id, 10) : null;
   const { items } = useItems();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (parsedId) {
-      const foundItem = items.find((item) => item.id === parsedId);
+    if (id) {
+      const foundItem = items.find((item) => item.id === id);
       setItem(foundItem || null);
       setLoading(false);
     }
-  }, [parsedId, items]);
+  }, [id, items]);
 
   if (loading) {
     return (
@@ -35,7 +34,7 @@ export default function EditItemScreen() {
       <ThemedView style={styles.centered}>
         <ThemedText style={styles.title}>Item Not Found</ThemedText>
         <ThemedText style={styles.message}>
-          The item you're trying to edit doesn't exist or has been deleted.
+          The item you're trying to edit doesn't exist or has been deleted.zzz
         </ThemedText>
       </ThemedView>
     );
