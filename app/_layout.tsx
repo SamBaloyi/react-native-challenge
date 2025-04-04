@@ -16,7 +16,6 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../store";
 import OfflineNotice from "@/components/OfflineNotice";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -38,26 +37,27 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <GestureHandlerRootView>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
               <OfflineNotice />
               <Stack>
                 <Stack.Screen
                   name="(tabs)"
-                  options={{ headerShown: true, title: "" }}
+                  options={{
+                    headerShown: false,
+                  }}
                 />
                 <Stack.Screen name="+not-found" />
               </Stack>
-              <StatusBar style="auto" />
-            </ThemeProvider>
-          </PersistGate>
-        </Provider>
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </PersistGate>
+    </Provider>
   );
 }
