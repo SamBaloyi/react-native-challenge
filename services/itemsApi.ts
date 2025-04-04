@@ -5,7 +5,7 @@ import { Item } from "../types/item";
 // For RTK Query
 /**
  * The `itemsApi` is an RTK Query API slice for managing CRUD operations on items.
- * It interacts with a REST API hosted at `https://jsonplaceholder.typicode.com`.
+ * It interacts with a REST API hosted locally
  *
  * @remarks
  * This API slice is configured with the following endpoints:
@@ -27,7 +27,7 @@ import { Item } from "../types/item";
 export const itemsApi = createApi({
   reducerPath: "itemsApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://jsonplaceholder.typicode.com",
+    baseUrl: process.env.EXPO_PUBLIC_BASE_URL,
   }),
   tagTypes: ["Item"],
   endpoints: (builder) => ({
@@ -120,7 +120,7 @@ export const updateItem = async (item: Item): Promise<Item> => {
   }
 };
 
-export const deleteItem = async (id: number): Promise<void> => {
+export const deleteItem = async (id: string): Promise<void> => {
   try {
     await api.delete(`/posts/${id}`);
   } catch (error) {

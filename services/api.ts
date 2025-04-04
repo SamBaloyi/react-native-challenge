@@ -1,14 +1,14 @@
 import axios, { AxiosInstance } from "axios";
 
 // We're using JSONPlaceholder as our API for this example
-const API_BASE_URL = "https://jsonplaceholder.typicode.com";
+const API_BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 /**
  * Creates an Axios instance configured with a base URL, default headers, and a timeout.
- * 
+ *
  * @constant
  * @type {AxiosInstance}
- * 
+ *
  * @property {string} baseURL - The base URL for API requests, defined by `API_BASE_URL`.
  * @property {object} headers - Default headers for all requests, including `Content-Type: application/json`.
  * @property {number} timeout - The maximum time (in milliseconds) before a request times out, set to 10,000ms.
