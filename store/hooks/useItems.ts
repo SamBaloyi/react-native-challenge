@@ -1,4 +1,3 @@
-// store/hooks/useItems.ts
 import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../index";
@@ -52,7 +51,7 @@ export const useItems = () => {
   );
 
   const deleteItem = useCallback(
-    (id: string) => {
+    (id: number) => {
       if (isConnected) {
         return dispatch(deleteItemThunk(id));
       } else {
