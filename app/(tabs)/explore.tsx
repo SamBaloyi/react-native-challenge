@@ -35,7 +35,7 @@ export default function ExploreScreen() {
   }, [fetchItems]);
 
   const handleDelete = useCallback(
-    (id: string) => {
+    (id: number) => {
       deleteItem(id);
     },
     [deleteItem]
@@ -94,7 +94,7 @@ export default function ExploreScreen() {
       <FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         refreshControl={
