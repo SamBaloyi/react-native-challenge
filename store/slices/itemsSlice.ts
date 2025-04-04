@@ -12,13 +12,15 @@ interface ItemsState {
   offlineItems: {
     create: Item[];
     update: Item[];
-    delete: number[];
+    delete: string[];
   };
   status: "idle" | "loading" | "succeeded" | "failed";
+  syncStatus: "idle" | "syncing" | "succeeded" | "failed";
   error: string | null;
   lastFetched: number | null;
 }
 
+// Update initialState
 const initialState: ItemsState = {
   items: [],
   offlineItems: {
@@ -27,6 +29,7 @@ const initialState: ItemsState = {
     delete: [],
   },
   status: "idle",
+  syncStatus: "idle",
   error: null,
   lastFetched: null,
 };
@@ -70,7 +73,7 @@ export const updateItemThunk = createAsyncThunk(
 
 export const deleteItemThunk = createAsyncThunk(
   "items/deleteItem",
-  async (id: number, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue }) => {
     try {
       await deleteItem(id);
       return id;
@@ -80,10 +83,61 @@ export const deleteItemThunk = createAsyncThunk(
   }
 );
 
-// Type for offline items that need temporary IDs
-interface TempItem extends Omit<Item, "id"> {
-  tempId?: string;
-}
+export const syncOfflineItemsThunk = createAsyncThunk(
+  "items/syncOfflineItems",
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const state = getState() as { items: ItemsState };
+      const { offlineItems } = state.items;
+
+      // Track IDs that need to be replaced in local state
+      const tempToRealIdMap = new Map<string, string>();
+
+      // Process create operations
+      for (const item of offlineItems.create) {
+        // Remove temporary ID and create real item
+        const { id: tempId, ...itemData } = item;
+        const result = await dispatch(createItemThunk(itemData)).unwrap();
+
+        // Store mapping from temp ID to real ID for later replacement
+        if (tempId.startsWith("temp-")) {
+          tempToRealIdMap.set(tempId, result.id);
+        }
+      }
+
+      // Process update operations - but filter out any with temp IDs that were just created
+      const updatesWithRealIds = offlineItems.update.filter(
+        (item) =>
+          !item.id.startsWith("temp-") ||
+          !offlineItems.create.some((createItem) => createItem.id === item.id)
+      );
+
+      for (const item of updatesWithRealIds) {
+        await dispatch(updateItemThunk(item));
+      }
+
+      // Process delete operations - but filter out temp IDs
+      const deletesWithRealIds = offlineItems.delete.filter(
+        (id) => !id.startsWith("temp-")
+      );
+
+      for (const id of deletesWithRealIds) {
+        await dispatch(deleteItemThunk(id));
+      }
+
+      // Clear the offline queue after successful sync
+      dispatch(syncOfflineItems());
+
+      // Return the temp to real ID mapping for possible UI updates
+      return {
+        success: true,
+        tempToRealIdMap: Object.fromEntries(tempToRealIdMap),
+      };
+    } catch (error) {
+      return rejectWithValue(`Failed to sync offline items: ${error}`);
+    }
+  }
+);
 
 const itemsSlice = createSlice({
   name: "items",
@@ -91,17 +145,12 @@ const itemsSlice = createSlice({
   reducers: {
     // For offline operations
     addOfflineItem: (state, action: PayloadAction<Omit<Item, "id">>) => {
-      // For offline items, use a negative integer as a temporary ID
-      // This way we can distinguish between real API IDs (positive) and temporary ones (negative)
-      const tempId = -Math.floor(Math.random() * 1000000) - 1; // Random negative number
       const newItem = {
         ...action.payload,
-        id: tempId,
-        tempId: `temp-${Date.now()}`, // Keep track of the original temp ID format for compatibility
-      } as Item & { tempId?: string };
-
-      state.offlineItems.create.push(newItem);
-      state.items.push(newItem);
+        id: `temp-${Date.now()}`, // Temporary ID until synced
+      };
+      state.offlineItems.create.push(newItem as Item);
+      state.items.push(newItem as Item);
     },
     updateOfflineItem: (state, action: PayloadAction<Item>) => {
       const index = state.items.findIndex(
@@ -112,7 +161,7 @@ const itemsSlice = createSlice({
         state.offlineItems.update.push(action.payload);
       }
     },
-    deleteOfflineItem: (state, action: PayloadAction<number>) => {
+    deleteOfflineItem: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
       state.offlineItems.delete.push(action.payload);
     },
@@ -153,6 +202,16 @@ const itemsSlice = createSlice({
       })
       .addCase(deleteItemThunk.fulfilled, (state, action) => {
         state.items = state.items.filter((item) => item.id !== action.payload);
+      })
+      .addCase(syncOfflineItemsThunk.pending, (state) => {
+        state.syncStatus = "syncing";
+      })
+      .addCase(syncOfflineItemsThunk.fulfilled, (state) => {
+        state.syncStatus = "succeeded";
+      })
+      .addCase(syncOfflineItemsThunk.rejected, (state, action) => {
+        state.syncStatus = "failed";
+        state.error = action.payload as string;
       });
   },
 });
