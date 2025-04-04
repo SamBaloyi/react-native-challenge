@@ -1,6 +1,6 @@
 // types/item.ts
 export interface Item {
-    id: string;
+    id: number;
     title: string;
     body: string;
     userId: number;
