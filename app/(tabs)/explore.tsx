@@ -41,7 +41,7 @@ export default function ExploreScreen() {
   }, [fetchItems]);
 
   const handleDelete = useCallback(
-    (id: number) => {
+    (id: string) => {
       deleteItem(id);
     },
     [deleteItem]
@@ -97,7 +97,7 @@ export default function ExploreScreen() {
                     </ThemedText>
                   </View>
 
-                  {item.id < 0 && (
+                  {item.id.toString().startsWith("temp-") && (
                     <View
                       style={[styles.badge, { backgroundColor: "#fff3cd" }]}
                     >
@@ -105,7 +105,7 @@ export default function ExploreScreen() {
                       <ThemedText
                         style={[styles.badgeText, { color: "#856404" }]}
                       >
-                        Offline
+                        Created offline (not synced)
                       </ThemedText>
                     </View>
                   )}
@@ -178,8 +178,8 @@ export default function ExploreScreen() {
       <FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderHeader}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
