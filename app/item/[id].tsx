@@ -15,20 +15,20 @@ import { ThemedView } from "../../components/ThemedView";
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  //   console.log("local id:L", id);
+  const parsedId = id ? parseInt(id, 10) : null;
   const { items, deleteItem } = useItems();
   const { isConnected } = useNetwork();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
+    if (parsedId) {
       // Find the item in the local state
-      const foundItem = items.find((item) => item.id === id);
+      const foundItem = items.find((item) => item.id === parsedId);
       setItem(foundItem || null);
       setLoading(false);
     }
-  }, [id, items]);
+  }, [parsedId, items]);
 
   const handleDelete = () => {
     Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
@@ -37,8 +37,8 @@ export default function ItemDetailScreen() {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          if (id) {
-            deleteItem(id);
+          if (parsedId) {
+            deleteItem(parsedId);
             router.back();
           }
         },
@@ -47,7 +47,7 @@ export default function ItemDetailScreen() {
   };
 
   const handleEdit = () => {
-    router.push(`/item/edit/${id}`);
+    router.push(`/item/edit/${parsedId}`);
   };
 
   if (loading) {
@@ -72,6 +72,9 @@ export default function ItemDetailScreen() {
     );
   }
 
+  // Check if this is a temporary item (offline created)
+  const isTemporaryItem = item.id < 0; // Negative IDs are temporary
+
   return (
     <>
       <Stack.Screen
@@ -93,7 +96,7 @@ export default function ItemDetailScreen() {
 
         <View style={styles.metaInfo}>
           <ThemedText style={styles.metaText}>ID: {item.id}</ThemedText>
-          {item.id.startsWith("temp-") && (
+          {isTemporaryItem && (
             <ThemedText style={styles.offlineIndicator}>
               Created offline (not synced)
             </ThemedText>
@@ -112,15 +115,15 @@ export default function ItemDetailScreen() {
             style={[
               styles.button,
               styles.deleteButton,
-              !isConnected && item.id.startsWith("temp-")
+              !isConnected && !isTemporaryItem
                 ? styles.disabledButton
                 : {},
             ]}
             onPress={handleDelete}
-            disabled={!isConnected && !item.id.startsWith("temp-")}
+            disabled={!isConnected && !isTemporaryItem}
           >
             <ThemedText style={styles.buttonText}>
-              {!isConnected && !item.id.startsWith("temp-")
+              {!isConnected && !isTemporaryItem
                 ? "Cannot Delete While Offline"
                 : "Delete Item"}
             </ThemedText>
@@ -130,7 +133,6 @@ export default function ItemDetailScreen() {
     </>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
