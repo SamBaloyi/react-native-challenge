@@ -31,9 +31,9 @@ export default function CreateItemScreen() {
       />
       <ThemedView style={styles.container}>
         <ItemForm
-          initialValues={{ title: "", body: "", userId: 1 }}
-          onSubmit={handleSubmit}
-          isLoading={isSubmitting}
+        //   initialValues={{ title: "", body: "", userId: 1 }}
+        //   onSubmit={handleSubmit}
+        //   isLoading={isSubmitting}
         />
       </ThemedView>
     </>
