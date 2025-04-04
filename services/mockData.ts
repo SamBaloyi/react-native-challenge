@@ -12,31 +12,31 @@ import { Item } from "../types/item";
  */
 export const mockItems: Item[] = [
   {
-    id: "1",
+    id: 1,
     title: "First Item",
     body: "This is the body of the first item",
     userId: 1,
   },
   {
-    id: "2",
+    id: 2,
     title: "Second Item",
     body: "This is the body of the second item",
     userId: 1,
   },
   {
-    id: "3",
+    id: 3,
     title: "Third Item",
     body: "This is the body of the third item",
     userId: 2,
   },
   {
-    id: "4",
+    id: 4,
     title: "Fourth Item",
     body: "This is the body of the fourth item",
     userId: 2,
   },
   {
-    id: "5",
+    id: 5,
     title: "Fifth Item",
     body: "This is the body of the fifth item",
     userId: 3,
