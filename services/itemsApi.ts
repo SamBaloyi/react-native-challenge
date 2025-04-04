@@ -120,7 +120,7 @@ export const updateItem = async (item: Item): Promise<Item> => {
   }
 };
 
-export const deleteItem = async (id: string): Promise<void> => {
+export const deleteItem = async (id: number): Promise<void> => {
   try {
     await api.delete(`/posts/${id}`);
   } catch (error) {
