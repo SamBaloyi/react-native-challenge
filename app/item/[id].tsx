@@ -18,24 +18,32 @@ import { IconSymbol } from "../../components/ui/IconSymbol";
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const parsedId = id ? parseInt(id, 10) : null;
   const { items, deleteItem } = useItems();
   const { isConnected } = useNetwork();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const tintColor = useThemeColor({ light: "#0a7ea4", dark: "#4287f5" }, "tint");
-  const backgroundColor = useThemeColor({ light: "#f7f7f9", dark: "#1e2022" }, "background");
-  const subtleBackground = useThemeColor({ light: "#f0f2f5", dark: "#252a2e" }, "background");
+
+  const tintColor = useThemeColor(
+    { light: "#0a7ea4", dark: "#4287f5" },
+    "tint"
+  );
+  const backgroundColor = useThemeColor(
+    { light: "#f7f7f9", dark: "#1e2022" },
+    "background"
+  );
+  const subtleBackground = useThemeColor(
+    { light: "#f0f2f5", dark: "#252a2e" },
+    "background"
+  );
 
   useEffect(() => {
-    if (parsedId) {
+    if (id) {
       // Find the item in the local state
-      const foundItem = items.find((item) => item.id === parsedId);
+      const foundItem = items.find((item) => item.id === id);
       setItem(foundItem || null);
       setLoading(false);
     }
-  }, [parsedId, items]);
+  }, [id, items]);
 
   const handleDelete = () => {
     Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
@@ -44,8 +52,8 @@ export default function ItemDetailScreen() {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          if (parsedId) {
-            deleteItem(parsedId);
+          if (id) {
+            deleteItem(id);
             router.back();
           }
         },
@@ -69,13 +77,17 @@ export default function ItemDetailScreen() {
     return (
       <ThemedView style={styles.centered}>
         <View style={styles.notFoundContainer}>
-          <IconSymbol size={64} name="exclamationmark.triangle.fill" color="#f59e0b" />
+          <IconSymbol
+            size={64}
+            name="exclamationmark.triangle.fill"
+            color="#f59e0b"
+          />
           <ThemedText style={styles.title}>Item Not Found</ThemedText>
           <ThemedText style={styles.text}>
-            The item you're looking for doesn't exist or has been deleted.
+            The item you're looking for doesn't exist or has been deleted.xxx
           </ThemedText>
-          <Pressable 
-            style={[styles.backButton, { backgroundColor: tintColor }]} 
+          <Pressable
+            style={[styles.backButton, { backgroundColor: tintColor }]}
             onPress={() => router.back()}
           >
             <ThemedText style={styles.backButtonText}>Go Back</ThemedText>
@@ -86,7 +98,7 @@ export default function ItemDetailScreen() {
   }
 
   // Check if this is a temporary item (offline created)
-  const isTemporaryItem = item.id < 0; // Negative IDs are temporary
+  const isTemporaryItem = item.id.startsWith("temp");
 
   return (
     <>
@@ -100,9 +112,13 @@ export default function ItemDetailScreen() {
         <ScrollView showsVerticalScrollIndicator={false} bounces={true}>
           <View style={styles.header}>
             <ThemedText style={styles.title}>{item.title}</ThemedText>
-            <View style={[styles.userBadge, { backgroundColor: subtleBackground }]}>
+            <View
+              style={[styles.userBadge, { backgroundColor: subtleBackground }]}
+            >
               <IconSymbol size={16} name="person.fill" color={tintColor} />
-              <ThemedText style={styles.userId}>User ID: {item.userId}</ThemedText>
+              <ThemedText style={styles.userId}>
+                User ID: {item.userId}
+              </ThemedText>
             </View>
           </View>
 
@@ -112,11 +128,13 @@ export default function ItemDetailScreen() {
           </ThemedView>
 
           <View style={styles.metaInfo}>
-            <View style={[styles.idBadge, { backgroundColor: subtleBackground }]}>
+            <View
+              style={[styles.idBadge, { backgroundColor: subtleBackground }]}
+            >
               <IconSymbol size={16} name="number" color={tintColor} />
               <ThemedText style={styles.metaText}>ID: {item.id}</ThemedText>
             </View>
-            
+
             {isTemporaryItem && (
               <View style={styles.offlineIndicator}>
                 <IconSymbol size={16} name="wifi.slash" color="#856404" />
@@ -129,10 +147,14 @@ export default function ItemDetailScreen() {
 
           <View style={styles.divider} />
         </ScrollView>
-        
+
         <View style={styles.buttonContainer}>
           <Pressable
-            style={[styles.button, styles.editButton, { backgroundColor: tintColor }]}
+            style={[
+              styles.button,
+              styles.editButton,
+              { backgroundColor: tintColor },
+            ]}
             onPress={handleEdit}
           >
             <IconSymbol size={20} name="pencil" color="white" />
