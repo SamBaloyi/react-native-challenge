@@ -51,7 +51,7 @@ export const useItems = () => {
   );
 
   const deleteItem = useCallback(
-    (id: number) => {
+    (id: string) => {
       if (isConnected) {
         return dispatch(deleteItemThunk(id));
       } else {
