@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useItems } from "../../../store/hooks/useItems";
-import { Item, ItemFormValues } from "../../../types/item";
+import { Item } from "../../../types/item";
 import ItemForm from "../../../components/ItemForm";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
@@ -10,10 +10,9 @@ import { ThemedText } from "../../../components/ThemedText";
 export default function EditItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const parsedId = id ? parseInt(id, 10) : null;
-  const { items, updateItem } = useItems();
+  const { items } = useItems();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (parsedId) {
@@ -22,21 +21,6 @@ export default function EditItemScreen() {
       setLoading(false);
     }
   }, [parsedId, items]);
-
-  const handleSubmit = async (values: ItemFormValues) => {
-    if (!item) return;
-
-    setIsSubmitting(true);
-    try {
-      const updatedItem: Item = {
-        ...item,
-        ...values,
-      };
-      await updateItem(updatedItem);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -66,15 +50,7 @@ export default function EditItemScreen() {
         }}
       />
       <ThemedView style={styles.container}>
-        <ItemForm
-          initialValues={{
-            title: item.title,
-            body: item.body,
-            userId: item.userId,
-          }}
-          onSubmit={handleSubmit}
-          isLoading={isSubmitting}
-        />
+        <ItemForm />
       </ThemedView>
     </>
   );
