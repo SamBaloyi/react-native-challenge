@@ -16,13 +16,11 @@ import { ThemedText } from "../components/ThemedText";
 import { ThemedView } from "../components/ThemedView";
 import { useThemeColor } from "../hooks/useThemeColor";
 import { IconSymbol } from "../components/ui/IconSymbol";
-import { Item } from "../types/item";
 import { useNetwork } from "../store/hooks/useNetwork";
 
 export default function ItemForm() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isEditMode = !!id;
-  const parsedId = id ? parseInt(id, 10) : null;
 
   const { items, createItem, updateItem } = useItems();
   const { isConnected } = useNetwork();
@@ -36,7 +34,7 @@ export default function ItemForm() {
 
   const tintColor = useThemeColor(
     { light: "#0a7ea4", dark: "#4287f5" },
-    "tint"
+    "icon"
   );
   const inputBg = useThemeColor(
     { light: "#f0f2f5", dark: "#252a2e" },
@@ -47,9 +45,11 @@ export default function ItemForm() {
     "text"
   );
 
+  const inputColor = useThemeColor({}, "text");
+
   useEffect(() => {
-    if (isEditMode && parsedId) {
-      const item = items.find((item) => item.id === parsedId);
+    if (isEditMode && id) {
+      const item = items.find((item) => item.id === id);
       if (item) {
         setTitle(item.title);
         setBody(item.body);
@@ -57,7 +57,7 @@ export default function ItemForm() {
       }
       setInitialLoading(false);
     }
-  }, [isEditMode, parsedId, items]);
+  }, [isEditMode, id, items]);
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -85,35 +85,42 @@ export default function ItemForm() {
 
     setLoading(true);
     try {
-      const itemData: Item = {
-        id: parsedId!,
-        title,
-        body,
-        userId: parseInt(userId, 10),
-      };
-
-      if (isEditMode && parsedId) {
-        await updateItem(itemData);
-        router.replace(`/item/${parsedId}`);
+      if (isEditMode && id) {
+        await updateItem({
+          id,
+          title: title!,
+          body: body!,
+          userId: parseInt(userId, 10),
+        });
+        router.back();
+        router.replace(`/item/${id}`);
       } else {
-        const newItem = await createItem(itemData);
-        router.replace(`/item/${newItem.id}`);
+        const newItem = await createItem({
+          title: title!,
+          body: body!,
+          userId: parseInt(userId, 10),
+        });
+        console.log("New item created:", newItem);
+        // @ts-ignore
+        router.replace(`/item/${newItem.payload.id}`);
       }
     } catch (error) {
+      console.log(error);
       Alert.alert(
         "Error",
         isEditMode
-          ? "Failed to update the item. Please try again."
-          : "Failed to create the item. Please try again."
+          ? "Failed to update the item. Please try again later."
+          : "Failed to create the item. Please try again later."
       );
+      router.back();
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    if (isEditMode && parsedId) {
-      router.replace(`/item/${parsedId}`);
+    if (isEditMode && id) {
+      router.replace(`/item/${id}`);
     } else {
       router.back();
     }
@@ -166,7 +173,7 @@ export default function ItemForm() {
             <TextInput
               style={[
                 styles.input,
-                { backgroundColor: inputBg, color: placeholderColor },
+                { backgroundColor: inputBg, color: inputColor },
                 errors.title ? styles.inputError : {},
               ]}
               placeholder="Enter item title"
@@ -184,7 +191,7 @@ export default function ItemForm() {
             <TextInput
               style={[
                 styles.textArea,
-                { backgroundColor: inputBg, color: placeholderColor },
+                { backgroundColor: inputBg, color: inputColor },
                 errors.body ? styles.inputError : {},
               ]}
               placeholder="Enter item content"
@@ -204,7 +211,7 @@ export default function ItemForm() {
             <TextInput
               style={[
                 styles.input,
-                { backgroundColor: inputBg, color: placeholderColor },
+                { backgroundColor: inputBg, color: inputColor },
                 errors.userId ? styles.inputError : {},
               ]}
               placeholder="Enter user ID"

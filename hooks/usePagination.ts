@@ -1,4 +1,3 @@
-// hooks/usePagination.ts
 import { useState, useCallback, useEffect } from 'react';
 
 interface UsePaginationParams<T> {

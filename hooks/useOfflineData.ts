@@ -1,7 +1,8 @@
-// hooks/useOfflineData.ts
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useItems } from '../store/hooks/useItems';
-import { useNetwork } from '../store/hooks/useNetwork';
+import { RootState, AppDispatch } from '../store';
+import { syncOfflineItemsThunk } from '../store/slices/itemsSlice';
 
 interface UseOfflineDataResult {
   isSyncing: boolean;
@@ -11,14 +12,15 @@ interface UseOfflineDataResult {
 }
 
 export function useOfflineData(): UseOfflineDataResult {
-  const { isConnected } = useNetwork();
+  const dispatch = useDispatch<AppDispatch>();
   const { 
     fetchItems,
     offlineItems,
     lastFetched,
   } = useItems();
+  const { isConnected } = useSelector((state: RootState) => state.network);
+  const { syncStatus } = useSelector((state: RootState) => state.items);
   
-  const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<Date | null>(
     lastFetched ? new Date(lastFetched) : null
   );
@@ -29,40 +31,27 @@ export function useOfflineData(): UseOfflineDataResult {
     offlineItems.update.length + 
     offlineItems.delete.length;
 
-  // Sync data when coming back online
-  useEffect(() => {
-    if (isConnected && pendingChanges > 0) {
-      syncData();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
-
-  // Function to sync pending changes with the server
+  // Function to manually sync pending changes with the server
   const syncData = async () => {
-    if (!isConnected || isSyncing) return;
+    if (!isConnected || syncStatus === "syncing") return;
     
     try {
-      setIsSyncing(true);
+      // Use our thunk that handles the actual syncing logic
+      await dispatch(syncOfflineItemsThunk());
       
-      // In a real app, you would implement the logic to:
-      // 1. Send all pending creates
-      // 2. Send all pending updates
-      // 3. Send all pending deletes
-      // 4. Fetch latest data from the server
-      
-      // For now, just fetch the latest data
+      // Fetch latest data after sync
       await fetchItems();
       
-      setLastSynced(new Date());
+      if (lastFetched) {
+        setLastSynced(new Date(lastFetched));
+      }
     } catch (error) {
       console.error('Error syncing data:', error);
-    } finally {
-      setIsSyncing(false);
     }
   };
 
   return {
-    isSyncing,
+    isSyncing: syncStatus === "syncing",
     lastSynced,
     pendingChanges,
     syncData,
