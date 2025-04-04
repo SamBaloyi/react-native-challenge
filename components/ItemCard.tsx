@@ -9,7 +9,7 @@ import { Feather } from "@expo/vector-icons";
 
 interface ItemCardProps {
   item: Item;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({ item, onDelete }) => {
