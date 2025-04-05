@@ -70,15 +70,74 @@ src/
    # or
    yarn install
    ```
+3. Setting Up `json-server` with `npx`
+   Instead of installing json-server globally, you can use npx to run it without installation. Follow these steps:
 
-3. Start the development server:
+
+   In your root directory, create a `db.json5` file with your desired mock data structure.
+
+   Example `db.json5`:
+
+   ```json5
+   {
+   "posts": [
+      { "id": 1, "title": "Hello World" },
+      { "id": 2, "title": "Another Post" }
+   ]
+   }
+   ```
+
+   On a separate terminal, run `json-server` using `npx`:
+
+   ```bash
+   npx json-server --watch db.json5 --port 3000
+   ```
+
+   This will start `json-server` on `http://localhost:3000`, and it will simulate a RESTful API with the data from `db.json5`.
+
+4. Start the development server:
    ```bash
    npm start
    # or
    yarn start
    ```
 
-4. Run on Android or iOS:
+5. Set the EXPO_PUBLIC_IP_ADDRESS
+   In some development environments, particularly if you're using a mobile device or emulator, you might need to access your app over the local network. To ensure proper communication, you need to set the `EXPO_PUBLIC_IP_ADDRESS` to your local machine's IP address.
+
+   Add the following environment variable to your `.env` file (create one if it doesn't exist):
+
+   ```
+   EXPO_PUBLIC_IP_ADDRESS=http://<your-ip-address>:3000
+   ```
+
+   **How to Get Your IP Address***
+
+   #### On macOS/Linux:
+   1. Open a terminal.
+   2. Run the following command:
+
+   ```bash
+   ifconfig | grep inet
+   ```
+
+   This will output several network interfaces. Look for an IP address like `192.168.x.x` or `10.x.x.x`. This is your local IP address.
+
+   #### On Windows:
+   1. Open a Command Prompt (search for "cmd" in the Start menu).
+   2. Run the following command:
+
+   ```bash
+   ipconfig
+   ```
+
+   Look for the "IPv4 Address" under your active network connection. This will be your local IP address.
+
+   ---
+
+   Once you've completed these steps, your app should be able to access the `json-server` through the local network and communicate using the mock data provided in `db.json5`.
+
+5. Finally, run on Android or iOS:
    ```bash
    # For Android
    npm run android
@@ -90,6 +149,7 @@ src/
    # or
    yarn ios
    ```
+
 
 ## Application Flow
 1. **Home Screen**: Displays a list of items fetched from the API
